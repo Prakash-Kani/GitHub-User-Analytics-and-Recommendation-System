@@ -1,7 +1,26 @@
-from dash import Dash, html, dcc,callback, Input, Output, ctx
-import dash
+from dash import Dash, html, dcc,callback, Input, Output,State, ctx, dash_table
+import dash_bootstrap_components as dbc
+import mysql.connector
 
 import render_file as render
+import data_extraction as extract
+
+import os
+from dotenv import load_dotenv
+
+# Load environment variables from .env file
+load_dotenv()
+
+mysql_host_name = os.getenv("MYSQL_HOST_NAME")
+mysql_user_name = os.getenv("MYSQL_USER_NAME")
+mysql_password = os.getenv("MYSQL_PASSWORD")
+mysql_database_name = os.getenv("MYSQL_DATABASE_NAME")
+
+mydb = mysql.connector.connect(host = mysql_host_name,
+                             user = mysql_user_name,
+                             password = mysql_password,
+                             database = mysql_database_name)
+mycursor = mydb.cursor(buffered = True)
 
 external_stylesheets = ["https://codepen.io/chriddyp/pen/bWLwgP.css"]
 app = Dash(__name__,
@@ -54,14 +73,39 @@ def render_content(tab):
 
 @callback(
     Output("new", "children"),
-    [Input("fetch", "n_clicks"),Input("login", "value")],
+    [Input("fetch", "n_clicks"), Input("save to mysql", "n_clicks"), Input("login", "value")],
 )
 
-def extract_tab(fetch, login):
+def extract_tab(fetch, sql, user_login_name):
     button = ctx.triggered_id
-    if button =='fetch' and login:  
-        # print(login)
-        return html.H1(login)
+    # print(button)
+    # print(user_login_name)
+    if button =='fetch' and user_login_name:  
+        userdetails = extract.User_Details(user_login_name = user_login_name)
+        # repodetails = extract.Repositories_Details(user_login_name = user_login_name)
+        return [html.H1(user_login_name),
+                html.Label("User Details Table"),
+                dash_table.DataTable(userdetails.to_dict('records'),[{"name": i, "id": i} for i in userdetails.columns], id='user-detials-tbl'),
+                html.Label("Repositories Details Table"),]
+                # dash_table.DataTable(repodetails.to_dict('records'),[{"name": i, "id": i} for i in repodetails.columns], id='repo-detials-tbl')]
+    if button=='save to mysql' and user_login_name:
+        userdetails = extract.User_Details(user_login_name = user_login_name)
+        values = userdetails.to_records(index = False)
+        uservalues= values.tolist()
+        print(uservalues)
+        insert=extract.User_Details_Migration(uservalues)
+        if insert:
+            return [html.H1(user_login_name),
+                    html.Label("User Details Table"),
+                    dash_table.DataTable(userdetails.to_dict('records'),[{"name": i, "id": i} for i in userdetails.columns], id='user-detials-tbl'),
+                    # html.Label("Repositories Details Table"),
+                    # dash_table.DataTable(repodetails.to_dict('records'),[{"name": i, "id": i} for i in repodetails.columns], id='repo-detials-tbl')]
+                    html.H2('Successfully insert')]
+            # return [html.H1(user_login_name),
+            #         html.Label("User Details Table"),
+            #         dash_table.DataTable(userdetails.to_dict('records'),[{"name": i, "id": i} for i in userdetails.columns], id='user-detials-tbl'),
+            #         html.Label("Repositories Details Table"),
+            #         dash_table.DataTable(repodetails.to_dict('records'),[{"name": i, "id": i} for i in repodetails.columns], id='repo-detials-tbl')]
 
 
 
