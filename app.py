@@ -1,9 +1,12 @@
 from dash import Dash, html, dcc,callback, Input, Output,State, ctx, dash_table
 import dash_bootstrap_components as dbc
 import mysql.connector
+import pandas as pd
+
 
 import render_file as render
 import data_extraction as extract
+import analysis
 
 import os
 from dotenv import load_dotenv
@@ -59,12 +62,14 @@ app.layout = html.Div([
 @callback(Output('tab-page', 'children'),
               Input('tabs', 'value'))
 def render_content(tab):
+    mycursor.execute('SELECT DISTINCT(Login) FROM user_details;')
+    data = mycursor.fetchall()
+    uniquelogin = [i[0] for i in data]
     if tab == 'tab-1':
         return render.Extracting_Data_tab()
     elif tab == 'tab-2':
-        return html.Div([
-            html.H3('Tab content 2')
-        ])
+        return render.Analysis_tab(uniquelogin)
+        
     elif tab == 'tab-3':
         return html.Div([
             html.H3('Tab content 3')
@@ -72,7 +77,7 @@ def render_content(tab):
     
 
 @callback(
-    Output("new", "children"),
+    Output("tables", "children"),
     [Input("fetch", "n_clicks"), Input("save to mysql", "n_clicks"), Input("login", "value")],
 )
 
@@ -103,6 +108,14 @@ def extract_tab(fetch, sql, user_login_name):
                     dash_table.DataTable(repodetails.to_dict('records'),[{"name": i, "id": i} for i in repodetails.columns], id='repo-detials-tbl'),
                     html.H2('Successfully insert')]
 
+
+
+@app.callback([Output('avatar', 'children'), Output('user-details', 'children')],
+              Input('user-login-name', 'value'),)
+def Analysis_Tab(login_name):
+    image = analysis.avatar_Image(login_name)
+    profile_details = analysis.User_Profile_details(login_name)
+    return [image, profile_details]
 
 
 if __name__ == '__main__':
