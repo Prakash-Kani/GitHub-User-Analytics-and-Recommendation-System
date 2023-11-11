@@ -78,34 +78,30 @@ def render_content(tab):
 
 def extract_tab(fetch, sql, user_login_name):
     button = ctx.triggered_id
-    # print(button)
-    # print(user_login_name)
     if button =='fetch' and user_login_name:  
         userdetails = extract.User_Details(user_login_name = user_login_name)
-        # repodetails = extract.Repositories_Details(user_login_name = user_login_name)
+        repodetails = extract.Repositories_Details(user_login_name = user_login_name)
         return [html.H1(user_login_name),
                 html.Label("User Details Table"),
                 dash_table.DataTable(userdetails.to_dict('records'),[{"name": i, "id": i} for i in userdetails.columns], id='user-detials-tbl'),
-                html.Label("Repositories Details Table"),]
-                # dash_table.DataTable(repodetails.to_dict('records'),[{"name": i, "id": i} for i in repodetails.columns], id='repo-detials-tbl')]
-    if button=='save to mysql' and user_login_name:
+                html.Label("Repositories Details Table"),
+                dash_table.DataTable(repodetails.to_dict('records'),[{"name": i, "id": i} for i in repodetails.columns], id='repo-detials-tbl')]
+    elif button=='save to mysql' and user_login_name:
         userdetails = extract.User_Details(user_login_name = user_login_name)
-        values = userdetails.to_records(index = False)
-        uservalues= values.tolist()
-        print(uservalues)
-        insert=extract.User_Details_Migration(uservalues)
-        if insert:
+        uservalues = userdetails.to_records(index = False)
+        uservalues= uservalues.tolist()
+        userinsert=extract.User_Details_Migration(uservalues)
+        repodetails = extract.Repositories_Details(user_login_name = user_login_name)
+        repovalues = repodetails.to_records(index = False)
+        repovalues= repovalues.tolist()
+        repoinsert=extract.Repositories_Details_Migration(repovalues)
+        if userinsert and repoinsert:
             return [html.H1(user_login_name),
                     html.Label("User Details Table"),
                     dash_table.DataTable(userdetails.to_dict('records'),[{"name": i, "id": i} for i in userdetails.columns], id='user-detials-tbl'),
-                    # html.Label("Repositories Details Table"),
-                    # dash_table.DataTable(repodetails.to_dict('records'),[{"name": i, "id": i} for i in repodetails.columns], id='repo-detials-tbl')]
+                    html.Label("Repositories Details Table"),
+                    dash_table.DataTable(repodetails.to_dict('records'),[{"name": i, "id": i} for i in repodetails.columns], id='repo-detials-tbl'),
                     html.H2('Successfully insert')]
-            # return [html.H1(user_login_name),
-            #         html.Label("User Details Table"),
-            #         dash_table.DataTable(userdetails.to_dict('records'),[{"name": i, "id": i} for i in userdetails.columns], id='user-detials-tbl'),
-            #         html.Label("Repositories Details Table"),
-            #         dash_table.DataTable(repodetails.to_dict('records'),[{"name": i, "id": i} for i in repodetails.columns], id='repo-detials-tbl')]
 
 
 
