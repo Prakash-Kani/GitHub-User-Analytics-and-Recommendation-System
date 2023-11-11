@@ -57,6 +57,7 @@ def User_Profile_details(login_name):
     ]
     return profile_details
 
+
 def Repo_per_Languages_fig(login_name):
     mycursor.execute(f"""SELECT Language_Used as Language, COUNT(*) as Count FROM repositories_details
                         WHERE Owner = '{login_name}' AND Language_Used IS NOT NULL
@@ -98,4 +99,36 @@ def Stars_Per_Languages_fig(login_name):
     'plot_bgcolor': '#E8CFCA',  # Setting the plot background color
     'paper_bgcolor': '#E8CFCA'  # Setting the paper background color
         })
+    return fig
+
+def Top_Commits_per_repo_fig(login_name):
+    mycursor.execute(f"""SELECT Repo_Name, sum(Commits) as Commits FROM repositories_details
+                        WHERE Owner = '{login_name}' AND Language_Used IS NOT NULL
+                        GROUP BY Repo_Name
+                        ORDER BY Commits DESC LIMIT 10;""")
+    data4 = mycursor.fetchall()
+    df4 = pd.DataFrame(data4, columns=[i[0] for i in mycursor.description]) 
+
+    fig = px.pie(df4, values='Commits', names='Repo_Name', title='Commits Per Repo', hole = 0.5)
+    fig.update_layout({
+    'plot_bgcolor': '#E8CFCA',  # Setting the plot background color
+    'paper_bgcolor': '#E8CFCA'  # Setting the paper background color
+        })
+    
+    return fig
+
+def Top_Stars_Per_repo_fig(login_name):
+    mycursor.execute(f"""SELECT Repo_Name, sum(Stargazers) as Stars FROM repositories_details
+                        WHERE Owner = '{login_name}' AND Language_Used IS NOT NULL
+                        GROUP BY Repo_Name
+                        ORDER BY Stars DESC LIMIT 10;""")
+    data5= mycursor.fetchall()
+    df5 = pd.DataFrame(data5, columns=[i[0] for i in mycursor.description]) 
+
+    fig = px.pie(df5, values='Stars', names='Repo_Name', title='Stars Per Repo', hole = 0.5)
+    fig.update_layout({
+    'plot_bgcolor': '#E8CFCA',  # Setting the plot background color
+    'paper_bgcolor': '#E8CFCA'  # Setting the paper background color
+        })
+    
     return fig
