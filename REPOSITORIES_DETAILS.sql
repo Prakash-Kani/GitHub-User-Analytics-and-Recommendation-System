@@ -80,3 +80,12 @@ SELECT Language_Used as Language, sum(Stargazers) AS Stars FROM repositories_det
                         WHERE Owner = 'Prakash-Kani' AND Language_Used IS NOT NULL
                         GROUP BY Language_Used;
 
+SELECT Repo_Name, sum(Commits) as Commits FROM repositories_details
+                        WHERE Owner = 'Prakash-Kani' AND Language_Used IS NOT NULL
+                        GROUP BY Repo_Name
+                        ORDER BY Commits DESC LIMIT 10;
+                        
+SELECT Repo_Name, sum(Stargazers) as Stars FROM repositories_details
+                        WHERE Owner = 'Prakash-Kani' AND Language_Used IS NOT NULL
+                        GROUP BY Repo_Name
+                        ORDER BY Stars DESC LIMIT 10;
