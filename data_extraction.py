@@ -102,6 +102,9 @@ def Repositories_Details(user_login_name):
         repo_list.append(data)
 
     repo_details = pd.DataFrame(repo_list)
+    repo_details.Created_At = pd.to_datetime(repo_details.Created_At).dt.date
+    repo_details.Pushed_At = pd.to_datetime(repo_details.Pushed_At).dt.date
+    repo_details.Updated_At = pd.to_datetime(repo_details.Updated_At).dt.date
     return repo_details
 
 
@@ -122,7 +125,7 @@ def User_Details_Migration(uservalues):
                         Languages_Used TEXT,
                         Starred_Repo LONGTEXT);""")
     mydb.commit()
-    query = f"""INSERT INTO userdetails
+    query = f"""INSERT INTO user_details
                 (User_Name, Login, Bio, Joined_At, Email, Location, Company, Following_Count, Followers_Count, Public_Repos, Avatar_url, Profile_url, Languages_Used, Starred_Repo) 
                 VALUES (%s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s)
                 ON DUPLICATE KEY UPDATE
@@ -143,3 +146,50 @@ def User_Details_Migration(uservalues):
     mycursor.executemany(query,uservalues)
     mydb.commit()
     return 'Successfully Inserted!'
+
+
+
+def Repositories_Details_Migration(repovalues):
+    mycursor.execute("""CREATE TABLE IF NOT EXISTS repositories_details(
+                        Owner VARCHAR(250),
+                        Repo_Name VARCHAR(250),
+                        Repo_Link VARCHAR(250),
+                        Created_At DATE,
+                        Description TEXT,
+                        Forks_Count INT,
+                        Repo_Fullname VARCHAR(250) PRIMARY KEY,
+                        Repo_ID INT, 
+                        Language_Used VARCHAR(250),
+                        Last_Modified INT,
+                        Pushed_At DATE,
+                        Size INT,
+                        Subscriber INT,
+                        Sargazers INT,
+                        Updated_At DATE,
+                        Watchers_Counts INT, 
+                        Commits INT);""")
+    mydb.commit()
+    query = f"""INSERT INTO repositories_details
+                (Owner, Repo_Name, Repo_Link, Created_At, Description, Forks_Count, Repo_Fullname, Repo_ID, Language_Used, Last_Modified, Pushed_At, Size, Subscriber, Sargazers, Updated_At, Watchers_Counts, Commits)
+                VALUES (%s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s)
+                ON DUPLICATE KEY UPDATE
+                Owner = VALUES(Owner),
+                Repo_Name = VALUES(Repo_Name), 
+                Repo_Link = VALUES(Repo_Link), 
+                Created_At = VALUES(Created_At), 
+                Description = VALUES(Description), 
+                Forks_Count = VALUES(Forks_Count), 
+                Repo_Fullname = VALUES(Repo_Fullname), 
+                Repo_ID = VALUES(Repo_ID), 
+                Language_Used = VALUES(Language_Used), 
+                Last_Modified = VALUES(Last_Modified), 
+                Pushed_At = VALUES(Pushed_At), 
+                Size = VALUES(Size), 
+                Subscriber = VALUES(Subscriber), 
+                Sargazers = VALUES(Sargazers), 
+                Updated_At = VALUES(Updated_At), 
+                Watchers_Counts = VALUES(Watchers_Counts), 
+                Commits = VALUES(Commits);"""
+    a=mycursor.executemany(query,repovalues)
+    mydb.commit()
+    return 'Successfully Inserted!',a
