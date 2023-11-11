@@ -56,3 +56,46 @@ def User_Profile_details(login_name):
         # dcc.Markdown(f"# {df.Bio.iloc[0]}", style = {'color': '#4090F5'}),
     ]
     return profile_details
+
+def Repo_per_Languages_fig(login_name):
+    mycursor.execute(f"""SELECT Language_Used as Language, COUNT(*) as Count FROM repositories_details
+                        WHERE Owner = '{login_name}' AND Language_Used IS NOT NULL
+                        GROUP BY Language_Used;""")
+    data1 = mycursor.fetchall()
+    df1 = pd.DataFrame(data1, columns=[i[0] for i in mycursor.description]) 
+
+    fig1 = px.pie(df1, values='Count', names='Language', title='Repos Per Languages', hole = 0.5)
+    fig1.update_layout({
+    'plot_bgcolor': '#E8CFCA',  # Setting the plot background color
+    'paper_bgcolor': '#E8CFCA'  # Setting the paper background color
+        })
+    return fig1
+
+def Commits_Per_Languages_fig(login_name):
+    mycursor.execute(f"""SELECT Language_Used as Language, sum(Commits) AS Commits FROM repositories_details
+                        WHERE Owner = '{login_name}' AND Language_Used IS NOT NULL
+                        GROUP BY Language_Used;""")
+    data2 = mycursor.fetchall()
+    df2 = pd.DataFrame(data2, columns=[i[0] for i in mycursor.description]) 
+
+
+    fig = px.pie(df2, values='Commits', names='Language', title='Commits Per Languages ', hole = 0.5)
+    fig.update_layout({
+    'plot_bgcolor': '#E8CFCA',  # Setting the plot background color
+    'paper_bgcolor': '#E8CFCA'  # Setting the paper background color
+        })
+    return fig
+
+def Stars_Per_Languages_fig(login_name):
+    mycursor.execute(f"""SELECT Language_Used as Language, sum(Stargazers) AS Stars FROM repositories_details
+                        WHERE Owner = '{login_name}' AND Language_Used IS NOT NULL
+                        GROUP BY Language_Used;""")
+    data3 = mycursor.fetchall()
+    df3 = pd.DataFrame(data3, columns=[i[0] for i in mycursor.description]) 
+
+    fig = px.pie(df3, values='Stars', names='Language', title='Stars Per Languages', hole = 0.5)
+    fig.update_layout({
+    'plot_bgcolor': '#E8CFCA',  # Setting the plot background color
+    'paper_bgcolor': '#E8CFCA'  # Setting the paper background color
+        })
+    return fig
