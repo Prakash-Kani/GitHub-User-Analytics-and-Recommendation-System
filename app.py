@@ -92,20 +92,12 @@ def render_content(tab):
 
 @callback(
     Output("tables", "children"),
-    [Input("fetch", "n_clicks"), Input("save to mysql", "n_clicks"), Input("login", "value")],
+    [Input("save to mysql", "n_clicks"), Input("login", "value")],
 )
 
-def extract_tab(fetch, sql, user_login_name):
+def extract_tab(sql, user_login_name):
     button = ctx.triggered_id
-    if button =='fetch' and user_login_name:  
-        userdetails = extract.User_Details(user_login_name = user_login_name)
-        repodetails = extract.Repositories_Details(user_login_name = user_login_name)
-        return [html.H1(user_login_name),
-                html.Label("User Details Table"),
-                dash_table.DataTable(userdetails.to_dict('records'),[{"name": i, "id": i} for i in userdetails.columns], id='user-detials-tbl'),
-                html.Label("Repositories Details Table"),
-                dash_table.DataTable(repodetails.to_dict('records'),[{"name": i, "id": i} for i in repodetails.columns], id='repo-detials-tbl')]
-    elif button=='save to mysql' and user_login_name:
+    if button=='save to mysql' and user_login_name:
         mydb, mycursor = get_mysql_connection()
 
         userdetails = extract.User_Details(user_login_name = user_login_name)
